@@ -19,7 +19,9 @@
       "fs": {
         "all": true,
         "scope": [
-          "E:\\抢票\\spider_img\\auth.json"
+          "/Users/carlwang/Downloads/spider_img/auth.json",
+          "/Users/carlwang/Downloads/spider_img/index.json",
+          "/Users/carlwang/Downloads/spider_img/request.json"
         ]
       }
     },

@@ -3,30 +3,31 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 // import Greet from "./components/Greet.vue";
 // import FileReader from './components/FileReader.vue'
-import { ref } from "vue"
+import { ref, provide } from "vue"
 
-import { useRouter } from 'vue-router';
 import Working from './components/Working.vue';
 import CheckToken from './components/CheckToken.vue';
-import axios from 'axios'
 
-
-const router = useRouter();
-
-const form = ref({
-  token: ''
-})
-
+const hostName = 'https://oryjk.cn:82';
+const clientToken = '1wscEia6CidvrxbmpOdWp5SviRKjIQy8';
+provide('clientToken', clientToken);
+provide('hostName', hostName);
 const isLogin = ref(false)
-const hostName = "https://oryjk.cn:82"
+
+const checkToken = ref();
+const working = ref();
+
+
 
 function login() {
-  const res = CheckToken.login()
+  const res = checkToken.value?.login()
 
-  console.log(res)
-  if (Boolean(res.valid) == true) {
-    isLogin.value = true
-  }
+  res.then((tokenInfo: any) => {
+    if (Boolean(tokenInfo.valid) == true) {
+      isLogin.value = true
+    }
+  })
+
 
 }
 
@@ -34,8 +35,8 @@ function login() {
 
 <template>
   <div class="container">
-    <CheckToken v-if="!isLogin" />
-    <Working v-if="isLogin" />
+    <CheckToken v-if="!isLogin" ref="checkToken" />
+    <Working v-if="isLogin" ref="working" />
     <el-button type="primary" @click="login">登录</el-button>
   </div>
 

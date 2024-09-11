@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import axios from 'axios'
+import emitter from './eventBus';
+
+
+const hostName = inject<string>('hostName');
+
 
 const form = ref({
     token: ''
 })
-
-const hostName = "https://oryjk.cn:82"
 
 interface TokenInfo {
     token: string,
@@ -14,10 +17,10 @@ interface TokenInfo {
     valid: boolean
 }
 
-async function login(): Promise<TokenInfo> {
+function login(): Promise<TokenInfo> {
     console.log(form.value.token)
-    const result = await getData(hostName + "/api/token/check/" + form.value.token)
-
+    emitter.emit('message', form.value.token);
+    const result = getData(hostName + "/api/token/check/" + form.value.token)
     return result
 
 }
@@ -29,6 +32,7 @@ async function getData(uri: string): Promise<TokenInfo> {
 
 defineExpose({
     login
+
 });
 </script>
 

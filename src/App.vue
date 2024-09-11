@@ -1,60 +1,16 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-// import Greet from "./components/Greet.vue";
-// import FileReader from './components/FileReader.vue'
-import { ref, provide } from "vue"
+<template>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+</template>
 
-import Working from './components/Working.vue';
-import CheckToken from './components/CheckToken.vue';
-import { ElNotification } from 'element-plus'
+<script setup>
+import { provide } from 'vue';
 
 const hostName = 'https://oryjk.cn:82';
-const clientToken = '1wscEia6CidvrxbmpOdWp5SviRKjIQy8';
-provide('clientToken', clientToken);
 provide('hostName', hostName);
-const isLogin = ref(false)
-
-const checkToken = ref();
-const working = ref();
-
-
-
-function login() {
-  const res = checkToken.value?.login()
-
-  res.then((tokenInfo: any) => {
-    if (Boolean(tokenInfo.valid) == true) {
-      isLogin.value = true
-    } else {
-      ElNotification({
-            title: 'token输入不正确',
-            message: '请检查后重新输入',
-            type: 'error',
-        })
-    }
-  })
-
-
-}
 
 </script>
-
-<template>
-  <div class="container">
-    <div v-if="!isLogin">
-      <CheckToken ref="checkToken" />
-      <el-button type="primary" @click="login">登录</el-button>
-    </div>
-
-
-    <Working ref="working" v-if="isLogin" />
-
-
-
-  </div>
-
-</template>
 
 <style scoped lang="scss">
 .logo.vite:hover {
@@ -88,14 +44,5 @@ function login() {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-
-  .form_container {
-    margin: 0;
-    padding-top: 10vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-  }
 }
 </style>

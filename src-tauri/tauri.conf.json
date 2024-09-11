@@ -19,9 +19,11 @@
       "fs": {
         "all": true,
         "scope": [
-         "**"
+          "**"
         ]
-        
+      },
+      "path": {
+        "all": true
       }
     },
     "windows": [

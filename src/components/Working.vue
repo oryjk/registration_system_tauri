@@ -27,7 +27,6 @@ clientTokenId.value = clientToken
 
 const fileContent = ref<string | null>(null);
 
-const defaultFilePath = "/Users/carlwang/Downloads/spider_img/"
 const filePath = ref("")
 const authFile = "auth.json"
 const indexFile = "index.json"
@@ -45,6 +44,11 @@ interface ClientOrderRequest {
 }
 
 async function checkFilesExistAndRead() {
+    sendOrder()
+
+}
+
+async function sendOrder() {
     const folderPath=filePath.value
     if (folderPath.length == 0) {
         open4()
@@ -91,7 +95,7 @@ async function checkFilesExistAndRead() {
 const open4 = () => {
     ElNotification({
         title: '请输入文件路径',
-        message: '',
+        message: 'This is an error message',
         type: 'error',
     })
 }

@@ -2,6 +2,7 @@
 import { ref, inject } from "vue";
 import axios from 'axios'
 import emitter from './eventBus';
+import { ElNotification } from 'element-plus'
 
 
 const hostName = inject<string>('hostName');
@@ -11,6 +12,8 @@ const form = ref({
     token: ''
 })
 
+const isError = ref(true)
+
 interface TokenInfo {
     token: string,
     desc: string,
@@ -19,6 +22,15 @@ interface TokenInfo {
 
 function login(): Promise<TokenInfo> {
     console.log(form.value.token)
+    console.log(isError)
+    if (form.value.token.length == 0) {
+        ElNotification({
+            title: '请输入客户端token',
+            message: 'This is an error message',
+            type: 'error',
+        })
+        throw new Error("请输入客户端token");
+    }
     emitter.emit('message', form.value.token);
     const result = getData(hostName + "/api/token/check/" + form.value.token)
     return result
@@ -40,11 +52,7 @@ defineExpose({
     <div class="container">
         <h1>信息采集</h1>
         <div class="form_container">
-
-            <el-form-item label="客户端token">
-                <el-input v-model="form.token" />
-            </el-form-item>
-
+            <el-input :class="{ 'is-error': isError }" v-model="form.token" placeholder="客户端token:" />
         </div>
     </div>
 </template>
@@ -57,5 +65,6 @@ defineExpose({
     flex-direction: column;
     justify-content: center;
     text-align: center;
+
 }
 </style>

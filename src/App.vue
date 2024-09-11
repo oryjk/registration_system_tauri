@@ -7,6 +7,7 @@ import { ref, provide } from "vue"
 
 import Working from './components/Working.vue';
 import CheckToken from './components/CheckToken.vue';
+import { ElNotification } from 'element-plus'
 
 const hostName = 'https://oryjk.cn:82';
 const clientToken = '1wscEia6CidvrxbmpOdWp5SviRKjIQy8';
@@ -25,6 +26,12 @@ function login() {
   res.then((tokenInfo: any) => {
     if (Boolean(tokenInfo.valid) == true) {
       isLogin.value = true
+    } else {
+      ElNotification({
+            title: 'token输入不正确',
+            message: '请检查后重新输入',
+            type: 'error',
+        })
     }
   })
 
@@ -35,9 +42,16 @@ function login() {
 
 <template>
   <div class="container">
-    <CheckToken v-if="!isLogin" ref="checkToken" />
-    <Working v-if="isLogin" ref="working" />
-    <el-button type="primary" @click="login">登录</el-button>
+    <div v-if="!isLogin">
+      <CheckToken ref="checkToken" />
+      <el-button type="primary" @click="login">登录</el-button>
+    </div>
+
+
+    <Working ref="working" v-if="isLogin" />
+
+
+
   </div>
 
 </template>

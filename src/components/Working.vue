@@ -4,7 +4,8 @@
             <el-input v-model="filePath" style="width: 240px" placeholder="d:\xxxx" clearable />
         </el-form-item>
 
-        <el-button type="primary" @click="checkFilesExistAndRead">开始监测</el-button>
+        <el-button type="primary" @click="checkFilesExistAndRead">开始固定下单</el-button>
+        <el-button type="primary" @click="checkUserInfo">开始监测用户信息</el-button>
 
         <div v-if="fileContent">
 
@@ -31,8 +32,11 @@ const filePath = ref("")
 const authFile = "auth.json"
 const indexFile = "index.json"
 const requestFile = "request.json"
+const memberFile = "member.json"
 
 const files = [authFile, indexFile, requestFile]
+
+const userInfoFiles = [authFile, indexFile, memberFile]
 
 interface ClientOrderRequest {
     orderId: string,
@@ -43,13 +47,20 @@ interface ClientOrderRequest {
     clientTokenId: string
 }
 
+interface UserInfoRequest {
+    userId: string,
+    member: Array<string>,
+    loginCode: string,
+    token: string,
+}
+
 async function checkFilesExistAndRead() {
     sendOrder()
 
 }
 
 async function sendOrder() {
-    const folderPath=filePath.value
+    const folderPath = filePath.value
     if (folderPath.length == 0) {
         open4()
         return
@@ -83,13 +94,55 @@ async function sendOrder() {
             token: authContent,
             clientTokenId: clientTokenId.value
         }
-        axios.post(`${hostName}/api/order/createSimpleOrder`, clientOrderRequest)
+        axios.post(`${hostName}/ticket/order/createSimpleOrder`, clientOrderRequest)
 
     } else {
         console.log('One or more files do not exist.');
     }
 }
 
+
+async function checkUserInfo() {
+    sendUseInfo()
+
+}
+
+async function sendUseInfo() {
+    const folderPath = filePath.value
+    if (folderPath.length == 0) {
+        open4()
+        return
+    }
+
+
+    const results = await Promise.all(userInfoFiles.map(file => {
+        const fileExist = exists(folderPath + file)
+        fileExist.then(exists => {
+            console.log(`file ${file} exist ${exists}`)
+        })
+        return fileExist
+    }));
+
+    const allExist = results.every(exists => exists);
+
+    if (allExist) {
+        console.log('All files exist.');
+        const authContent = await readTextFile(folderPath + files[0]);
+        const indexContent = JSON.parse(await readTextFile(folderPath + files[1]));
+        const memberContent = JSON.parse(await readTextFile(folderPath + files[2]));
+
+        const userInfoRequest: UserInfoRequest = {
+            userId: memberContent.data[0].uid,
+            member: memberContent.data,
+            loginCode: indexContent.code,
+            token: authContent
+        }
+        axios.post(`${hostName}/ticket/order/createUserInfo`, userInfoRequest)
+
+    } else {
+        console.log('One or more files do not exist.');
+    }
+}
 
 
 const open4 = () => {

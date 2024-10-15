@@ -10,11 +10,12 @@ const hostName = inject<string>('hostName');
 
 
 const form = ref({
-    token: ''
+    token: 'MUX9cBF8'
 })
 
 const isError = ref(true)
 const router = useRouter();
+
 
 interface TokenInfo {
     token: string,

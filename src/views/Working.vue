@@ -45,6 +45,7 @@ const clientTokenId = ref<string>('');
 clientTokenId.value = (Array.isArray(clientToken) ? clientToken[0] : clientToken) as string || '';
 
 const intervalId = ref(0)
+const jobIntervalId = ref(0)
 
 const filePath = ref("F:\\抢票\\spider_img")
 const authFile = "auth.json"
@@ -68,7 +69,7 @@ const orderList = ref<OrderInfo[]>([])
 
 const jobs = ref([])
 
-setInterval(getJobs, 1000);
+
 
 interface ClientOrderRequest {
     orderId: string,
@@ -157,6 +158,7 @@ async function checkUserInfo() {
     sendUseInfo()
     intervalId.value = setInterval(sendUseInfo, 1000);
     sendOrderStatus.value = true
+    jobIntervalId.value = setInterval(getJobs, 5000);
 }
 
 async function sendUseInfo() {
@@ -194,12 +196,13 @@ async function sendUseInfo() {
         }
         axios.post(`${hostName}/ticket/order/createUserInfo`, userInfoRequest)
 
-        // for (const file of userInfoFiles) {
-        //     const newFilePath = await join(folderPath + userId + '\\', file);
-        //     const targetDir = await dirname(newFilePath);
-        //     await createDir(targetDir, { recursive: true });
-        //     await renameFile(folderPath + file, newFilePath);
-        // }
+        for (const file of userInfoFiles) {
+            const newFilePath = await join(folderPath + userId + '\\', file);
+            const targetDir = await dirname(newFilePath);
+            await createDir(targetDir, { recursive: true });
+            await renameFile(folderPath + file, newFilePath);
+        }
+        console.log('移动到已处理文件夹' + targetDir);
 
     } else {
         console.log('One or more files do not exist.');
@@ -208,7 +211,9 @@ async function sendUseInfo() {
 
 function getJobs() {
     const runningJobs = axios.get(`${hostName}/ticket/order/getJobs`)
-    jobs.value = runningJobs
+    runningJobs.then(response => {
+        jobs.value = response.data
+    })
 }
 
 
@@ -226,6 +231,7 @@ function formatDateTime(date: Date): string {
 
 const stopRead = () => {
     clearInterval(intervalId.value)
+    clearInterval(jobIntervalId.value)
     sendOrderStatus.value = false
 }
 

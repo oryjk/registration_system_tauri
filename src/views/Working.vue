@@ -265,6 +265,7 @@ function getJobs() {
 function getUserCandidateOrders() {
     axios.get(`${hostName}/ticket/order/getUserCandidateOrders`).then(response => {
         console.log(response.data)
+        candidateOrderInfos.value.clear()
         Object.entries(response.data).forEach(userOrderEntry => {
             const userId = userOrderEntry[0]
             const userOrderInfos: OrderInfo[] = userOrderEntry[1] as OrderInfo[]
@@ -280,6 +281,7 @@ function getUserCandidateOrders() {
 function getUserOrders() {
     axios.get(`${hostName}/ticket/order/getUserOrders`).then(response => {
         console.log(response.data)
+        orderInfos.value.clear()
         Object.entries(response.data).forEach(userOrderEntry => {
             const userId = userOrderEntry[0]
             const userOrderInfos: OrderInfo[] = userOrderEntry[1] as OrderInfo[]

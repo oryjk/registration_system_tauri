@@ -240,7 +240,7 @@ function createOrders() {
     }
     axios.post(`${hostName}${path}/order/createOrders`, orderIds)
         .then(response => {
-            console.log(response.data)
+            getJobs()
         })
 }
 

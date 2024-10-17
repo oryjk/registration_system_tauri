@@ -239,7 +239,7 @@ function createOrders() {
     }
     axios.post(`${hostName}/ticket/order/createOrders`, orderIds)
         .then(response => {
-            console.log(response.data)
+            getJobs()
         })
 }
 

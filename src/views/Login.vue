@@ -35,7 +35,7 @@ async function login() {
         return
     }
 
-    const result = await getData(hostName + "/api/token/check/" + form.value.token)
+    const result = await getData(hostName + "/ticket/token/check/" + form.value.token)
     if (result.valid) {
         router.push({ name: 'Working', query: { inviteCode: form.value.token } });
     }

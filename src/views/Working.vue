@@ -1,27 +1,102 @@
 <template>
     <div class="container">
         <div class="content">
-            <el-form-item label="请输入文件夹路径: ">
-                <el-input v-model="filePath" style="width: 240px" placeholder="F:\抢票\spider_img" clearable />
-            </el-form-item>
-            <div class="btn">
-                <el-button v-show="!sendOrderStatus" type="primary" @click="checkFilesExistAndRead">开始固定下单</el-button>
-                <el-button v-show="!sendOrderStatus" @click="checkUserInfo">开始监测用户信息</el-button>
-                <el-button v-show="sendOrderStatus" type="danger" @click="stopRead">停止监测</el-button>
-                <el-button type="primary" @click="goBack">返回</el-button>
+            <div class="formContainer">
+                <el-form-item label="文件夹路径: ">
+                    <el-input v-model="filePath" placeholder="F:\抢票\spider_img" clearable />
+                </el-form-item>
+                <div class="button-container">
+                    <el-button type="primary" @click="checkUserInfo">开始监听新用户</el-button>
+                </div>
             </div>
+            <hr />
+            <div class="formContainer">
+                <el-form-item label="用户id: " label-width="100px">
+                    <el-input v-model="userBindInfo.userId" placeholder="用户id" clearable />
+                </el-form-item>
+                <el-form-item label="抢票人员: " label-width="100px">
+                    <el-input v-model="userBindInfo.users" placeholder="抢票人员" clearable />
+                </el-form-item>
+                <el-form-item label="加密密钥: " label-width="100px">
+                    <el-input v-model="userBindInfo.encryptKey" placeholder="加密密钥" clearable />
+                </el-form-item>
+                <el-form-item label="过期时间: " label-width="100px">
+                    <el-input v-model="userBindInfo.expireTime" placeholder="过期时间" clearable />
+                </el-form-item>
+                <el-form-item label="IV: " label-width="100px">
+                    <el-input v-model="userBindInfo.iv" placeholder="IV" clearable />
+                </el-form-item>
+                <el-form-item label="版本: " label-width="100px">
+                    <el-input v-model="userBindInfo.version" placeholder="版本" clearable />
+                </el-form-item>
+                <el-form-item label="座位区域: " label-width="100px">
+                    <el-input v-model="userBindInfo.regions" placeholder="地区" clearable />
+                </el-form-item>
+                <div class="button-container">
+                    <el-button type="primary" @click="bindUserInfo">绑定用户关键信息</el-button>
+                </div>
+            </div>
+            <hr />
+            <div class="formContainer checkbox-container">
 
-            <div class="job-container">
-                <p v-for="job in jobs" class="text item">任务 {{ job }} 正在运行</p>
+                <div v-for="[userId, userInfos] in candidateOrderInfos" :key="userId" :value="userId">
+                    <h3>{{ userId }}</h3>
+                    <el-checkbox-group v-model="checkedOrderIds">
+                        <el-checkbox v-for="orderInfo in userInfos" :key="orderInfo.orderId" :value="orderInfo.orderId">
+                            {{ orderInfo.orderId }} {{ orderInfo.realName }}</el-checkbox>
+
+                    </el-checkbox-group>
+                </div>
+
+
+                <div class="button-container">
+                    <el-button type="primary" @click="getUserCandidateOrders">刷新候选订单</el-button>
+                    <el-button type="primary" @click="createOrders">创建订单</el-button>
+                </div>
+            </div>
+            <hr />
+            <div class="formContainer checkbox-container">
+
+                <div v-for="[userId, userInfos] in orderInfos" :key="userId" :value="userId">
+                    <h3>{{ userId }}</h3>
+                    <el-checkbox-group v-model="savedOrderIds">
+                        <el-checkbox v-for="orderInfo in userInfos" :key="orderInfo.orderId" :value="orderInfo.orderId">
+                            {{ orderInfo.orderId }} {{ orderInfo.realName }}</el-checkbox>
+
+                    </el-checkbox-group>
+                </div>
+
+
+                <div class="button-container">
+                    <el-button type="primary" @click="getUserOrders">查看已经保存的订单</el-button>
+                </div>
+            </div>
+            <hr />
+
+            <div class="formContainer checkbox-container">
+
+
+                <el-checkbox-group v-model="prepareDeleteOrderIds">
+                    <el-checkbox v-for="orderInfo in jobs" :key="orderInfo" :value="orderInfo">
+                        {{ orderInfo }}
+                    </el-checkbox>
+
+                </el-checkbox-group>
+
+
+                <div class="button-container">
+                    <el-button type="danger" @click="deleteOrders">删除选中的订单</el-button>
+                    <el-button type="primary" @click="getJobs">查看正在运行的订单</el-button>
+                </div>
+            </div>
+            <hr />
+            <div class="btn">
+
+                <el-button v-show="sendOrderStatus" type="danger" @click="stopRead">停止监测</el-button>
+                <el-button @click="goBack">返回</el-button>
             </div>
         </div>
-        <div class="ticketInfo">
-            监控次数： {{ count }}
-            <div>
-                新添加列表：<p v-for="orderItem in orderList" :key="orderItem.name" class="text item">
-                    姓名: {{ orderItem.name }}, 区域：{{ orderItem.regionName }}, 提交时间：{{ orderItem.orderDateTime }}</p>
-            </div>
-        </div>
+
     </div>
 </template>
 
@@ -36,117 +111,61 @@ import { join, dirname } from '@tauri-apps/api/path'
 const route = useRoute();
 const router = useRouter();
 const clientToken = route.query.inviteCode;
-
 const hostName = inject<string>('hostName', '');
-
-
 const clientTokenId = ref<string>('');
-
 clientTokenId.value = (Array.isArray(clientToken) ? clientToken[0] : clientToken) as string || '';
-
 const intervalId = ref(0)
 const jobIntervalId = ref(0)
-
 const filePath = ref("F:\\抢票\\spider_img")
 const authFile = "auth.json"
 const indexFile = "index.json"
-const requestFile = "request.json"
-
 const memberFile = "member.json"
-
-const files = [authFile, indexFile, requestFile]
-
 const userInfoFiles = [authFile, indexFile, memberFile]
-
-const count = ref(0)
 const sendOrderStatus = ref(false)
-interface OrderInfo {
-    name: string,
-    regionName: string,
-    orderDateTime: string
-}
-const orderList = ref<OrderInfo[]>([])
-
 const jobs = ref([])
 
 
-
-interface ClientOrderRequest {
-    orderId: string,
-    matchId: string,
-    orderPayload: string,
+interface UserInfoRequest {
+    userId: string,
+    member: string,
     loginCode: string,
-    token: string,
-    clientTokenId: string
+    token: string
 }
 
-async function checkFilesExistAndRead() {
+interface UserBindInfo {
+    userId: string,
+    users: string,
+    encryptKey: string,
+    expireTime: string,
+    iv: string,
+    version: string,
+    regions: string
+}
+const userBindInfo = ref<UserBindInfo>({
+    userId: '',
+    users: '',
+    encryptKey: '',
+    expireTime: '',
+    iv: '',
+    version: '',
+    regions: ''
+})
 
-    let folderPath = filePath.value
-    if (folderPath.length == 0) {
-        open4()
-        return
-    }
-    sendOrder()
-    intervalId.value = setInterval(sendOrder, 1000);
-    sendOrderStatus.value = true
+interface OrderInfo {
+    orderId: string,
+    userId: string,
+    realName: string
 }
 
-async function sendOrder() {
-    let folderPath = filePath.value
+const candidateOrderInfos = ref<Map<string, OrderInfo[]>>(new Map([
+]))
+const orderInfos = ref<Map<string, OrderInfo[]>>(new Map([
+]))
 
-    if (!folderPath.endsWith('\\')) {
-        folderPath = folderPath + '\\'
-    }
+const checkedOrderIds = ref<string[]>([]);
 
-    console.log("folderPath " + folderPath)
-
-
-    const results = await Promise.all(files.map(file => {
-        const fileExist = exists(folderPath + file)
-        fileExist.then(exists => {
-            console.log(`file: ${folderPath + file} exist: ${exists}`)
-        })
-        return fileExist
-    }));
-
-    const allExist = results.every(exists => exists);
-
-    if (allExist) {
-        console.log('All files exist.');
-        const authContent = await readTextFile(folderPath + files[0]);
-        const indexContent = JSON.parse(await readTextFile(folderPath + files[1]));
-        const payloadText = await readTextFile(folderPath + files[2])
-        const requestContent = JSON.parse(payloadText);
-
-        const realname = requestContent.users[0].realname
-        const region = requestContent.regions[0].name
-
-        const clientOrderRequest: ClientOrderRequest = {
-            orderId: clientTokenId.value + "|" + realname + "|" + region,
-            matchId: requestContent.id,
-            orderPayload: payloadText,
-            loginCode: indexContent.code,
-            token: authContent,
-            clientTokenId: clientTokenId.value
-        }
-        axios.post(`${hostName}/api/order/createSimpleOrder`, clientOrderRequest)
-
-        orderList.value.push({ name: realname, regionName: region, orderDateTime: formatDateTime(new Date()) })
-
-        for (const file of files) {
-            const newFilePath = await join(folderPath + clientTokenId.value + '\\' + realname + '\\' + region + '\\', file);
-            const targetDir = await dirname(newFilePath);
-            await createDir(targetDir, { recursive: true });
-            await renameFile(folderPath + file, newFilePath);
-        }
-
-
-        count.value = count.value + 1
-    } else {
-        console.log('One or more files do not exist.');
-    }
-}
+const prepareDeleteOrderIds = ref<string[]>([]);
+const savedOrderIds = ref<string[]>([]);
 
 async function checkUserInfo() {
 
@@ -155,10 +174,13 @@ async function checkUserInfo() {
         open4()
         return
     }
-    sendUseInfo()
-    intervalId.value = setInterval(sendUseInfo, 1000);
+
     sendOrderStatus.value = true
+
+    intervalId.value = setInterval(sendUseInfo, 1000);
     jobIntervalId.value = setInterval(getJobs, 5000);
+    getUserCandidateOrders()
+
 }
 
 async function sendUseInfo() {
@@ -195,18 +217,42 @@ async function sendUseInfo() {
             token: authContent
         }
         axios.post(`${hostName}/ticket/order/createUserInfo`, userInfoRequest)
-
         for (const file of userInfoFiles) {
             const newFilePath = await join(folderPath + userId + '\\', file);
             const targetDir = await dirname(newFilePath);
             await createDir(targetDir, { recursive: true });
             await renameFile(folderPath + file, newFilePath);
+            console.log(`移动文件 ${file} 去 ${newFilePath}`)
         }
-        console.log('移动到已处理文件夹' + targetDir);
+
 
     } else {
         console.log('One or more files do not exist.');
     }
+}
+
+function createOrders() {
+    const orderIds = checkedOrderIds.value
+    if (orderIds.length === 0) {
+        console.log("没有选中任何候选订单，跳过")
+        return;
+    }
+    axios.post(`${hostName}/ticket/order/createOrders`, orderIds)
+        .then(response => {
+            console.log(response.data)
+        })
+}
+
+function bindUserInfo() {
+    axios.post(`${hostName}/ticket/order/bindUserInfo`, userBindInfo.value)
+}
+
+function deleteOrders() {
+    const orderIds = prepareDeleteOrderIds.value
+    axios.post(`${hostName}/ticket/order/deleteOrders`, orderIds).then(() => {
+        getJobs()
+    })
+
 }
 
 function getJobs() {
@@ -216,17 +262,34 @@ function getJobs() {
     })
 }
 
+function getUserCandidateOrders() {
+    axios.get(`${hostName}/ticket/order/getUserCandidateOrders`).then(response => {
+        console.log(response.data)
+        Object.entries(response.data).forEach(userOrderEntry => {
+            const userId = userOrderEntry[0]
+            const userOrderInfos: OrderInfo[] = userOrderEntry[1] as OrderInfo[]
+
+            candidateOrderInfos.value.set(userId, userOrderInfos)
 
 
-function formatDateTime(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份从0开始，所以需要加1
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
+        })
 
-    return `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`;
+    })
+}
+
+function getUserOrders() {
+    axios.get(`${hostName}/ticket/order/getUserOrders`).then(response => {
+        console.log(response.data)
+        Object.entries(response.data).forEach(userOrderEntry => {
+            const userId = userOrderEntry[0]
+            const userOrderInfos: OrderInfo[] = userOrderEntry[1] as OrderInfo[]
+
+            orderInfos.value.set(userId, userOrderInfos)
+
+
+        })
+
+    })
 }
 
 const stopRead = () => {
@@ -274,6 +337,42 @@ const goBack = () => {
         height: 400px;
         overflow-y: auto;
         /* 当内容超出高度时显示垂直滚动条 */
+    }
+
+    .formContainer {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        width: 750px;
+
+        .el-form-item {
+
+            width: 100%;
+        }
+
+        .button-container {
+            display: flex;
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    .checkbox-container {
+        display: flex;
+        flex-direction: column;
+
+        .el-checkbox-group {
+            display: flex;
+            // flex-direction: column;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+
+            .el-checkbox {
+                width: 150px;
+            }
+        }
+
     }
 
 }

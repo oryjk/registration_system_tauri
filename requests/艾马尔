@@ -1,0 +1,34 @@
+{
+    "encryptedData": "72a5a5fb67d3198ee6af9a797036accda487acd7710c2e6666d149293dd3a581d7c879e08f6d61fec00bdf929025289f8901160098591bb9a6e2395f9ef69d623da6a3cb8c736feb305323b85da2072b265f2d5e72384b5ec4ba6ccd9e0b7273ed70c2dc3cfbe75573b2524ef545cd63547b41d8ad3b33093a9c12adafc74b2af445db03845b97985d96a436ad140855fd672141eeecd851b3ead1516cd2fdf6a4fd539f568e84a2365de35370b23aace065673b5d630c7832268829afced519f756d2992feb23540bdfe27e144ee1249eeb091f2fd24293098edec640c0f507557659fe7537a666d000474e69b2b60c809fd22a1206116031007fcad9f2cb0435d088416709d2425a17efa7d146d44d6aea699d1039bbd4ef76b80838364a9a118d1ee00fde571202e989aace58a7c4bfb94717d7794621b6848ddfd3806d4ab6b4b3c936efcbde3e2c0f9fef96ae1af3c59431d2b894ab0852a4b14536ba514fdb57ebbe9f96b54518a24fb39453608cb80d9bb1e7857cd09894e4fcb71ce3150fccc29e389f26a4d33511e8fc5e26ef2d948b8cf3c46f1346c304f8ff5fa7b38931adaebd51ee00657f3dd7526a158db69df337238585fd8db22984b6df3d45cc1a07c0a17a1c47a46931ab55341c",
+    "version": 55,
+    "expireTime": 1729065691480,
+    "agree": true,
+    "id": "34",
+    "regions": [
+        {
+            "region": 6,
+            "estate": 3,
+            "num": 1,
+            "name": "503",
+            "price": "100.00",
+            "usable_count": 608
+        }
+    ],
+    "users": [
+        {
+            "id": 432555,
+            "uid": 432555,
+            "realname": "许京瑞",
+            "real_card_id": "510***********9028",
+            "phone": "185****3666",
+            "is_self": true,
+            "real_card_id2": "510211196411249028",
+            "phone2": "18502803666",
+            "timestamp": 1729062065,
+            "signature": "cd9c5f155b3295a09e882b98bcf337e0",
+            "disabled": false,
+            "disabled2": false,
+            "showText": "许京瑞 510***********9028"
+        }
+    ]
+}

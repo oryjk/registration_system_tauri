@@ -1,0 +1,142 @@
+{
+    "encryptedData": "d8360f1ac9c86ceb56613082e538bfc1ed02a5e6604944c12bf8b38771d1e29a24c9c774aeaba718c7da0d61aced04c9cd8a81db02543b9d40cabbd080ec5f0ef8b57588d91a15abafc37ed68663077c8f1bd25c696eac8c8cd7182e6ba7f999a01ad98431193763a50dd0d9ea5a796515d499d9c9c6b7ebf4cc9f61ad11f1cff7dc3a93c7fb90f77f53ee3f6f048d4b97b4f2df931dfef16845c6220dfee394a4125068e81f1883e13e356bd85839c7d9a107c9765cae36bb3ca92ebe9f5c79bef3c089fda1744518fb84b5913e6fd919bfc62edf62f3ffd60ed05ca98e66c5b1202e37ea7bd411b114a180c0d06892dc4feb6bd3b2eb3403cba7c496952050efc21502dc2380e2d005142574d22bf01f06071588f8b9820cde70b9ca2dd15ccd543d2b144c642b408573e187ec9e426a71f69d956731907a84a00243c1a1d1c3d3066b9795f3db9da450c35cda1dd44f78ab1c153c110f0a5e650e093b509debb9bca32382fc3427b76982b8005a448f4b7839413d926ccd1301789797f7adab350e6bac1af6ccc4cf5d2121caeff5da469a44fbf72c675c23ca7567ef7092ab9af77d9bdeb8d3d3638f2aad57355a06eaa615bb46cf3fe2498a56779661160a4b5a25cdb70451aa46b7d6a8fc027e",
+    "version": 77,
+    "expireTime": 1729065804180,
+    "agree": true,
+    "id": "34",
+    "regions": [
+        {
+            "region": 6,
+            "estate": 3,
+            "num": 1,
+            "name": "503",
+            "price": "100.00",
+            "usable_count": 608
+        }
+    ],
+    "users": [
+        {
+            "id": 159452,
+            "uid": 159452,
+            "realname": "许大海",
+            "real_card_id": "510***********9017",
+            "phone": "181****1106",
+            "is_self": true,
+            "real_card_id2": "510211197206289017",
+            "phone2": "18121871106",
+            "timestamp": 1729061760,
+            "signature": "bc426e0b99b2f4cdce7cbc8376c570bf",
+            "disabled": false,
+            "disabled2": false,
+            "showText": "许大海 510***********9017"
+        }
+    ]
+}
+
+-------------
+{
+    "encryptedData": "d8360f1ac9c86ceb56613082e538bfc1ed02a5e6604944c12bf8b38771d1e29a24c9c774aeaba718c7da0d61aced04c95bd76a8cb418c7e48cb909613b03e4448131d38e8a560e2221da89d5a6eedefdfa749fd8f92e8798c8efcebc4ad9697b6cb064df02d7375804edf2e698e212b61c3ae97f6eab74edeff099401119b6db15ad2f0bd33b079273ce5b9d1e2f74375e5e23a4d9be3b8a4260eff55ba256f4d94aac7500e112a38da9e3f14b2f224789009d5a2532c5f85845ba578ea36a2233ecf5ac6b589d3f3dc376d69d9c93c06a38ebe9e9a889e88e8d5b9143e901b5a96089b777d9e1ff0a6a72721fd67bc45be521224b4bfbbce7244894875fb2e4fbcfa5e711bac88480a6b1058a71c9a9b2aa16a8f1ac12a343b7ad8958bae4cc70885f1620943f6db1b6abc8eff73e24ec0e3f4a81641635039ec1d1313f22c1b00cfdfcca04d6903526d655f49a5e199cb416bc21df1ea51ea8afba410df4a9e3718b1c3f048d187bfaaa27156226ed595b1c933f6f43f30cf78ef4ab087cac6b2245791694f46b08b719248680c9f78e699049affc8fe10e9cc83ed4140ea23b8c9df4c80658a96da7a8e7bc86fda24e4617952e2ad4d56a2b86d774124353b3c0f2a128d65e31fdd33e7604f61da9",
+    "version": 77,
+    "expireTime": 1729065803638,
+    "agree": true,
+    "id": "34",
+    "regions": [
+        {
+            "region": 6,
+            "estate": 4,
+            "num": 1,
+            "name": "504",
+            "price": "100.00",
+            "usable_count": 417
+        }
+    ],
+    "users": [
+        {
+            "id": 159452,
+            "uid": 159452,
+            "realname": "许大海",
+            "real_card_id": "510***********9017",
+            "phone": "181****1106",
+            "is_self": true,
+            "real_card_id2": "510211197206289017",
+            "phone2": "18121871106",
+            "timestamp": 1729061760,
+            "signature": "bc426e0b99b2f4cdce7cbc8376c570bf",
+            "disabled": false,
+            "disabled2": false,
+            "showText": "许大海 510***********9017"
+        }
+    ]
+}
+
+-------------
+{
+    "encryptedData": "d8360f1ac9c86ceb56613082e538bfc1ed02a5e6604944c12bf8b38771d1e29a24c9c774aeaba718c7da0d61aced04c9221b255363c459cfc35020cb9d39773390bc25240bed57b4eb0e6b18c631a3aa5f2cd69182ff13e129d3334da306affa2219be4cd702e2388b4896f40b2c78de6b98211294589048dde9580e35eff9af119492b5d448e38423ba36b39d106a29b709476d250257f20d0d10cb3e1c9399de1ef611e3649eaa18f2d038e680d39c76fa2c109f63ada28001d5f3802a3da5e5ca0b808d8085f65c220c81210a6c5bc799b205eb4b44e48ab5a3fb02d24742623111c8e7b73330ebd4fc945f8a16ad6fec5b4a0d0ee5dd478fbb790f29e7f0da27c44943c3678c0ea6f0e123486824eeec978b2621a6a978427fecdeb0656efdcfae34ddb0a02c2e8f77018292b8488b37fba7fad0ef48bff91a30ba20f79261dbbf2fcce9d1946e6d24081c4ebe8ff9befdc56b1ce43d93d707646d175d1d5e627332612da7417d0fbc57f3730c159ec9d4fe0fc658163687ff89c0a6b0e74b3b00514336f02122815c1257aba31eb7de113d4915670c2bd482d43f8ec5e646faaf03a6d24aa10479199936c44d177fa845477d15070ac4e8de123bb7df0f9ae3c5433b1149fa2a36faca08cbd90b",
+    "version": 77,
+    "expireTime": 1729065804121,
+    "agree": true,
+    "id": "34",
+    "regions": [
+        {
+            "region": 6,
+            "estate": 24,
+            "num": 1,
+            "name": "524",
+            "price": "100.00",
+            "usable_count": 257
+        }
+    ],
+    "users": [
+        {
+            "id": 159452,
+            "uid": 159452,
+            "realname": "许大海",
+            "real_card_id": "510***********9017",
+            "phone": "181****1106",
+            "is_self": true,
+            "real_card_id2": "510211197206289017",
+            "phone2": "18121871106",
+            "timestamp": 1729061760,
+            "signature": "bc426e0b99b2f4cdce7cbc8376c570bf",
+            "disabled": false,
+            "disabled2": false,
+            "showText": "许大海 510***********9017"
+        }
+    ]
+}
+
+------------
+{
+    "encryptedData": "d8360f1ac9c86ceb56613082e538bfc1ed02a5e6604944c12bf8b38771d1e29a24c9c774aeaba718c7da0d61aced04c9dbd61cef6ed5ce65daa42d958d17afd919874a9f30b6ec6a3722175d8c4dab4b95b4ba904222620650d6a7edfaa64f007de19ba3cd44642dd996e33d03183e56a6594c26cce079ee5a9cedd142672337ea08fda018539ff54ac7f0f45f5e72ff78420597ac30131eeb1700254892b7184125a69e828cea91907ba19874342236f09e4530d37fc406a82bd931764ec7ebc00f6898906aba64aedcdeaf6009b3ff7fc438f24fbc277ed69667adb83ff5641fe8c063a36a929785826ef734ef99c51a84bfbf8d6fd5a4c0022e703fa29165fc44e11b40df65f309082f7941863140c0812b892547b41e6f6f3d6a10169ed27aacdaaf60f002866bcc89115b33da2d1d45d8970fb0d1a433f57adae3dd2e9ab2c06fee7862f96e2d7ead7547e73b7010044259ad29050ba56e5f0bb30ec4b46f152914a810b909375038637dbca69a4be5eff7a540667d13e3ffe06a1b7ba3275eebac40e692355213e872c8de6d71977ef767eb323b12b3f9d353ba55178b08d26bdf975bea9c4a685393b8639cd1ec60ad38848f1fc96ba1bc53c949b9b9b601a916929104cda5390e9b94e2f10e",
+    "version": 77,
+    "expireTime": 1729065804120,
+    "agree": true,
+    "id": "34",
+    "regions": [
+        {
+            "region": 6,
+            "estate": 18,
+            "num": 1,
+            "name": "518",
+            "price": "120.00",
+            "usable_count": 580
+        }
+    ],
+    "users": [
+        {
+            "id": 159452,
+            "uid": 159452,
+            "realname": "许大海",
+            "real_card_id": "510***********9017",
+            "phone": "181****1106",
+            "is_self": true,
+            "real_card_id2": "510211197206289017",
+            "phone2": "18121871106",
+            "timestamp": 1729061760,
+            "signature": "bc426e0b99b2f4cdce7cbc8376c570bf",
+            "disabled": false,
+            "disabled2": false,
+            "showText": "许大海 510***********9017"
+        }
+    ]
+}

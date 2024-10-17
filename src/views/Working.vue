@@ -101,18 +101,19 @@
 </template>
 
 <script setup lang="ts">
-import { readTextFile, exists, renameFile, createDir } from '@tauri-apps/api/fs';
+import { readTextFile, exists, renameFile, createDir } from '@tauri-apps/api/fs'
 import { ref, inject } from 'vue'
 import axios from 'axios'
 import { ElNotification } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router';
 import { join, dirname } from '@tauri-apps/api/path'
 
-const route = useRoute();
-const router = useRouter();
-const clientToken = route.query.inviteCode;
-const hostName = inject<string>('hostName', '');
-const clientTokenId = ref<string>('');
+const route = useRoute()
+const router = useRouter()
+const clientToken = route.query.inviteCode
+const hostName = inject<string>('hostName', '')
+const path = inject<string>('path', '')
+const clientTokenId = ref<string>('')
 clientTokenId.value = (Array.isArray(clientToken) ? clientToken[0] : clientToken) as string || '';
 const intervalId = ref(0)
 const jobIntervalId = ref(0)
@@ -216,7 +217,7 @@ async function sendUseInfo() {
             loginCode: indexContent.code,
             token: authContent
         }
-        axios.post(`${hostName}/ticket/order/createUserInfo`, userInfoRequest)
+        axios.post(`${hostName}${path}/order/createUserInfo`, userInfoRequest)
         for (const file of userInfoFiles) {
             const newFilePath = await join(folderPath + userId + '\\', file);
             const targetDir = await dirname(newFilePath);
@@ -237,33 +238,33 @@ function createOrders() {
         console.log("没有选中任何候选订单，跳过")
         return;
     }
-    axios.post(`${hostName}/ticket/order/createOrders`, orderIds)
+    axios.post(`${hostName}${path}/order/createOrders`, orderIds)
         .then(response => {
             console.log(response.data)
         })
 }
 
 function bindUserInfo() {
-    axios.post(`${hostName}/ticket/order/bindUserInfo`, userBindInfo.value)
+    axios.post(`${hostName}${path}/order/bindUserInfo`, userBindInfo.value)
 }
 
 function deleteOrders() {
     const orderIds = prepareDeleteOrderIds.value
-    axios.post(`${hostName}/ticket/order/deleteOrders`, orderIds).then(() => {
+    axios.post(`${hostName}${path}/order/deleteOrders`, orderIds).then(() => {
         getJobs()
     })
 
 }
 
 function getJobs() {
-    const runningJobs = axios.get(`${hostName}/ticket/order/getJobs`)
+    const runningJobs = axios.get(`${hostName}${path}/order/getJobs`)
     runningJobs.then(response => {
         jobs.value = response.data
     })
 }
 
 function getUserCandidateOrders() {
-    axios.get(`${hostName}/ticket/order/getUserCandidateOrders`).then(response => {
+    axios.get(`${hostName}${path}/order/getUserCandidateOrders`).then(response => {
         console.log(response.data)
         candidateOrderInfos.value.clear()
         Object.entries(response.data).forEach(userOrderEntry => {
@@ -279,7 +280,7 @@ function getUserCandidateOrders() {
 }
 
 function getUserOrders() {
-    axios.get(`${hostName}/ticket/order/getUserOrders`).then(response => {
+    axios.get(`${hostName}${path}/order/getUserOrders`).then(response => {
         console.log(response.data)
         orderInfos.value.clear()
         Object.entries(response.data).forEach(userOrderEntry => {

@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 
 
 const hostName = inject<string>('hostName');
+const path = inject<string>('path');
 
 
 const form = ref({
@@ -35,7 +36,7 @@ async function login() {
         return
     }
 
-    const result = await getData(hostName + "/ticket/token/check/" + form.value.token)
+    const result = await getData(hostName + `${path}/token/check/` + form.value.token)
     if (result.valid) {
         router.push({ name: 'Working', query: { inviteCode: form.value.token } });
     }

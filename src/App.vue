@@ -7,10 +7,10 @@
 <script setup>
 import { provide } from 'vue';
 
-// const hostName = 'https://oryjk.cn:82'; 
-const hostName = 'http://127.0.0.1:5678'; 
-const path = '/api'; 
-// const path = '/ticket'; 
+const hostName = 'https://oryjk.cn:82'; 
+// const hostName = 'http://127.0.0.1:5689'; 
+// const path = '/api'; 
+const path = '/ticket'; 
 provide('hostName', hostName);
 provide('path', path);
 

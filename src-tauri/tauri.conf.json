@@ -30,8 +30,8 @@
     "windows": [
       {
         "title": "registration_system_tauri",
-        "width": 800,
-        "height": 600
+        "width": 1000,
+        "height": 800
       }
     ],
     "security": {

@@ -39,12 +39,16 @@
             <hr />
             <div class="formContainer checkbox-container">
 
-                <div v-for="[userId, userInfos] in candidateOrderInfos" :key="userId" :value="userId">
-                    <h3>{{ userId }}</h3>
-                    <el-checkbox-group v-model="checkedOrderIds">
-                        <el-checkbox v-for="orderInfo in userInfos" :key="orderInfo.orderId" :value="orderInfo.orderId">
-                            {{ orderInfo.orderId }} {{ orderInfo.realName }}</el-checkbox>
+                <div v-for="userCandidateOrderInfos in candidateOrderInfos" :key="userCandidateOrderInfos.userId"
+                    :value="userCandidateOrderInfos.userId">
+                    <h3>{{ userCandidateOrderInfos.userId }}</h3>
+                    <el-checkbox v-model="userCandidateOrderInfos.checkAll"
+                        @change="handleCheckAllChange(userCandidateOrderInfos)">全选</el-checkbox>
 
+                    <el-checkbox-group v-model="userCandidateOrderInfos.checkedItems">
+                        <el-checkbox v-for="orderInfo in userCandidateOrderInfos.orderInfos" :key="orderInfo.orderId"
+                            :value="orderInfo.orderId">
+                            {{ orderInfo.orderId }} {{ orderInfo.realName }}</el-checkbox>
                     </el-checkbox-group>
                 </div>
 
@@ -77,8 +81,9 @@
 
 
                 <el-checkbox-group v-model="prepareDeleteOrderIds">
-                    <el-checkbox v-for="orderInfo in jobs" :key="orderInfo" :value="orderInfo">
-                        {{ orderInfo }}
+                    <el-checkbox v-for="runningJob in runningJobs" :key="runningJob.orderId" :value="runningJob.orderId"
+                        :disabled="runningJob.isLocked">
+                        {{ runningJob.orderId }}
                     </el-checkbox>
 
                 </el-checkbox-group>
@@ -122,7 +127,13 @@ const indexFile = "index.json"
 const memberFile = "member.json"
 const userInfoFiles = [authFile, indexFile, memberFile]
 const sendOrderStatus = ref(false)
-const jobs = ref([])
+
+
+interface RunningJob {
+    orderId: string,
+    isLocked: boolean
+}
+const runningJobs = ref<RunningJob[]>([])
 
 
 interface UserInfoRequest {
@@ -157,15 +168,30 @@ interface OrderInfo {
     realName: string
 }
 
-const candidateOrderInfos = ref<Map<string, OrderInfo[]>>(new Map([
-]))
+interface UserOrderInfos {
+    userId: string,
+    checkAll: boolean,
+    checkedItems: string[],
+    orderInfos: OrderInfo[]
+}
+
+const candidateOrderInfos = ref<UserOrderInfos[]>([])
 const orderInfos = ref<Map<string, OrderInfo[]>>(new Map([
 ]))
 
-const checkedOrderIds = ref<string[]>([]);
+// const checkedOrderIds = ref<string[]>([]);
 
 const prepareDeleteOrderIds = ref<string[]>([]);
 const savedOrderIds = ref<string[]>([]);
+
+function handleCheckAllChange(userOrderInfos: UserOrderInfos) {
+    if (userOrderInfos.checkAll) {
+        userOrderInfos.checkedItems = userOrderInfos.orderInfos.map(item => item.orderId);
+    } else {
+        userOrderInfos.checkedItems = [];
+
+    }
+}
 
 async function checkUserInfo() {
 
@@ -232,14 +258,16 @@ async function sendUseInfo() {
 }
 
 function createOrders() {
-    const orderIds = checkedOrderIds.value
+    const orderIds = candidateOrderInfos.value.map(userOrderInfos => userOrderInfos.checkedItems).flat()
     if (orderIds.length === 0) {
         console.log("没有选中任何候选订单，跳过")
         return;
     }
     axios.post(`${hostName}/ticket/order/createOrders`, orderIds)
-        .then(response => {
+        .then(() => {
             getJobs()
+            candidateOrderInfos.value.forEach(userOrderInfos => userOrderInfos.checkedItems = [])
+
         })
 }
 
@@ -249,28 +277,46 @@ function bindUserInfo() {
 
 function deleteOrders() {
     const orderIds = prepareDeleteOrderIds.value
+    runningJobs.value.filter(runningJob => prepareDeleteOrderIds.value.includes(runningJob.orderId)).forEach(runningJob => {
+        runningJob.isLocked = true
+    })
     axios.post(`${hostName}/ticket/order/deleteOrders`, orderIds).then(() => {
         getJobs()
+        prepareDeleteOrderIds.value = []
+        runningJobs.value = []
     })
 
 }
 
-function getJobs() {
-    const runningJobs = axios.get(`${hostName}/ticket/order/getJobs`)
-    runningJobs.then(response => {
-        jobs.value = response.data
+async function getJobs() {
+    const runningJobIds = axios.get(`${hostName}/ticket/order/getJobs`)
+    await runningJobIds.then(response => {
+        response.data.forEach((orderId: string) => {
+            runningJobs.value.push({
+                orderId: orderId,
+                isLocked: false
+            })
+        }
+        )
+
+
     })
 }
 
 function getUserCandidateOrders() {
     axios.get(`${hostName}/ticket/order/getUserCandidateOrders`).then(response => {
         console.log(response.data)
-        candidateOrderInfos.value.clear()
+        candidateOrderInfos.value = []
         Object.entries(response.data).forEach(userOrderEntry => {
             const userId = userOrderEntry[0]
             const userOrderInfos: OrderInfo[] = userOrderEntry[1] as OrderInfo[]
 
-            candidateOrderInfos.value.set(userId, userOrderInfos)
+            candidateOrderInfos.value.push({
+                userId: userId,
+                checkAll: false,
+                checkedItems: [],
+                orderInfos: userOrderInfos
+            })
 
 
         })

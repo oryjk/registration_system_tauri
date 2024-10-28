@@ -39,16 +39,12 @@
             <hr />
             <div class="formContainer checkbox-container">
 
-                <div v-for="userCandidateOrderInfos in candidateOrderInfos" :key="userCandidateOrderInfos.userId"
-                    :value="userCandidateOrderInfos.userId">
-                    <h3>{{ userCandidateOrderInfos.userId }}</h3>
-                    <el-checkbox v-model="userCandidateOrderInfos.checkAll"
-                        @change="handleCheckAllChange(userCandidateOrderInfos)">全选</el-checkbox>
-
-                    <el-checkbox-group v-model="userCandidateOrderInfos.checkedItems">
-                        <el-checkbox v-for="orderInfo in userCandidateOrderInfos.orderInfos" :key="orderInfo.orderId"
-                            :value="orderInfo.orderId">
+                <div v-for="[userId, userInfos] in candidateOrderInfos" :key="userId" :value="userId">
+                    <h3>{{ userId }}</h3>
+                    <el-checkbox-group v-model="checkedOrderIds">
+                        <el-checkbox v-for="orderInfo in userInfos" :key="orderInfo.orderId" :value="orderInfo.orderId">
                             {{ orderInfo.orderId }} {{ orderInfo.realName }}</el-checkbox>
+
                     </el-checkbox-group>
                 </div>
 
@@ -81,9 +77,8 @@
 
 
                 <el-checkbox-group v-model="prepareDeleteOrderIds">
-                    <el-checkbox v-for="runningJob in runningJobs" :key="runningJob.orderId" :value="runningJob.orderId"
-                        :disabled="runningJob.isLocked">
-                        {{ runningJob.orderId }}
+                    <el-checkbox v-for="orderInfo in jobs" :key="orderInfo" :value="orderInfo">
+                        {{ orderInfo }}
                     </el-checkbox>
 
                 </el-checkbox-group>
@@ -106,18 +101,19 @@
 </template>
 
 <script setup lang="ts">
-import { readTextFile, exists, renameFile, createDir } from '@tauri-apps/api/fs';
+import { readTextFile, exists, renameFile, createDir } from '@tauri-apps/api/fs'
 import { ref, inject } from 'vue'
 import axios from 'axios'
 import { ElNotification } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router';
 import { join, dirname } from '@tauri-apps/api/path'
 
-const route = useRoute();
-const router = useRouter();
-const clientToken = route.query.inviteCode;
-const hostName = inject<string>('hostName', '');
-const clientTokenId = ref<string>('');
+const route = useRoute()
+const router = useRouter()
+const clientToken = route.query.inviteCode
+const hostName = inject<string>('hostName', '')
+const path = inject<string>('path', '')
+const clientTokenId = ref<string>('')
 clientTokenId.value = (Array.isArray(clientToken) ? clientToken[0] : clientToken) as string || '';
 const intervalId = ref(0)
 const jobIntervalId = ref(0)
@@ -127,13 +123,7 @@ const indexFile = "index.json"
 const memberFile = "member.json"
 const userInfoFiles = [authFile, indexFile, memberFile]
 const sendOrderStatus = ref(false)
-
-
-interface RunningJob {
-    orderId: string,
-    isLocked: boolean
-}
-const runningJobs = ref<RunningJob[]>([])
+const jobs = ref([])
 
 
 interface UserInfoRequest {
@@ -168,30 +158,15 @@ interface OrderInfo {
     realName: string
 }
 
-interface UserOrderInfos {
-    userId: string,
-    checkAll: boolean,
-    checkedItems: string[],
-    orderInfos: OrderInfo[]
-}
-
-const candidateOrderInfos = ref<UserOrderInfos[]>([])
+const candidateOrderInfos = ref<Map<string, OrderInfo[]>>(new Map([
+]))
 const orderInfos = ref<Map<string, OrderInfo[]>>(new Map([
 ]))
 
-// const checkedOrderIds = ref<string[]>([]);
+const checkedOrderIds = ref<string[]>([]);
 
 const prepareDeleteOrderIds = ref<string[]>([]);
 const savedOrderIds = ref<string[]>([]);
-
-function handleCheckAllChange(userOrderInfos: UserOrderInfos) {
-    if (userOrderInfos.checkAll) {
-        userOrderInfos.checkedItems = userOrderInfos.orderInfos.map(item => item.orderId);
-    } else {
-        userOrderInfos.checkedItems = [];
-
-    }
-}
 
 async function checkUserInfo() {
 
@@ -242,7 +217,7 @@ async function sendUseInfo() {
             loginCode: indexContent.code,
             token: authContent
         }
-        axios.post(`${hostName}/ticket/order/createUserInfo`, userInfoRequest)
+        axios.post(`${hostName}${path}/order/createUserInfo`, userInfoRequest)
         for (const file of userInfoFiles) {
             const newFilePath = await join(folderPath + userId + '\\', file);
             const targetDir = await dirname(newFilePath);
@@ -258,65 +233,45 @@ async function sendUseInfo() {
 }
 
 function createOrders() {
-    const orderIds = candidateOrderInfos.value.map(userOrderInfos => userOrderInfos.checkedItems).flat()
+    const orderIds = checkedOrderIds.value
     if (orderIds.length === 0) {
         console.log("没有选中任何候选订单，跳过")
         return;
     }
-    axios.post(`${hostName}/ticket/order/createOrders`, orderIds)
-        .then(() => {
+    axios.post(`${hostName}${path}/order/createOrders`, orderIds)
+        .then(response => {
             getJobs()
-            candidateOrderInfos.value.forEach(userOrderInfos => userOrderInfos.checkedItems = [])
-
         })
 }
 
 function bindUserInfo() {
-    axios.post(`${hostName}/ticket/order/bindUserInfo`, userBindInfo.value)
+    axios.post(`${hostName}${path}/order/bindUserInfo`, userBindInfo.value)
 }
 
 function deleteOrders() {
     const orderIds = prepareDeleteOrderIds.value
-    runningJobs.value.filter(runningJob => prepareDeleteOrderIds.value.includes(runningJob.orderId)).forEach(runningJob => {
-        runningJob.isLocked = true
-    })
-    axios.post(`${hostName}/ticket/order/deleteOrders`, orderIds).then(() => {
+    axios.post(`${hostName}${path}/order/deleteOrders`, orderIds).then(() => {
         getJobs()
-        prepareDeleteOrderIds.value = []
-        runningJobs.value = []
     })
 
 }
 
-async function getJobs() {
-    const runningJobIds = axios.get(`${hostName}/ticket/order/getJobs`)
-    await runningJobIds.then(response => {
-        response.data.forEach((orderId: string) => {
-            runningJobs.value.push({
-                orderId: orderId,
-                isLocked: false
-            })
-        }
-        )
-
-
+function getJobs() {
+    const runningJobs = axios.get(`${hostName}${path}/order/getJobs`)
+    runningJobs.then(response => {
+        jobs.value = response.data
     })
 }
 
 function getUserCandidateOrders() {
-    axios.get(`${hostName}/ticket/order/getUserCandidateOrders`).then(response => {
+    axios.get(`${hostName}${path}/order/getUserCandidateOrders`).then(response => {
         console.log(response.data)
-        candidateOrderInfos.value = []
+        candidateOrderInfos.value.clear()
         Object.entries(response.data).forEach(userOrderEntry => {
             const userId = userOrderEntry[0]
             const userOrderInfos: OrderInfo[] = userOrderEntry[1] as OrderInfo[]
 
-            candidateOrderInfos.value.push({
-                userId: userId,
-                checkAll: false,
-                checkedItems: [],
-                orderInfos: userOrderInfos
-            })
+            candidateOrderInfos.value.set(userId, userOrderInfos)
 
 
         })
@@ -325,7 +280,7 @@ function getUserCandidateOrders() {
 }
 
 function getUserOrders() {
-    axios.get(`${hostName}/ticket/order/getUserOrders`).then(response => {
+    axios.get(`${hostName}${path}/order/getUserOrders`).then(response => {
         console.log(response.data)
         orderInfos.value.clear()
         Object.entries(response.data).forEach(userOrderEntry => {

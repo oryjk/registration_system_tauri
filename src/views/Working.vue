@@ -25,13 +25,14 @@
           <el-input v-model="currentBindUserInfoView.userId" placeholder="用户id" clearable/>
         </el-form-item>
         <el-form-item label="成员列表: " label-width="100px">
-          <el-input v-model="currentBindUserInfoView.memberIdNames" placeholder="成员列表" readonly/>
+          <el-input v-model="currentBindUserInfoView.memberIdNames" placeholder="成员列表" readonly
+                    class="readonly-input"/>
         </el-form-item>
         <el-form-item label="抢票球迷id: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.users" placeholder="抢票人员" clearable/>
         </el-form-item>
         <el-form-item label="球迷名称: " label-width="100px">
-          <el-input v-model="currentBindUserInfoView.userNames" placeholder="userid" readonly/>
+          <el-input v-model="currentBindUserInfoView.userNames" placeholder="userid" readonly class="readonly-input"/>
         </el-form-item>
         <el-form-item label="加密密钥: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.encryptKey" placeholder="加密密钥" clearable/>
@@ -39,9 +40,10 @@
         <el-form-item label="过期时间: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.expireTime" placeholder="过期时间" clearable/>
           <el-input v-model="currentBindUserInfoView.expireTimeStr" placeholder="过期时间" readonly
+                    class="readonly-input"
           />
-          <el-input v-model="currentTime" readonly/>
-          <el-input v-model="timeDifference" readonly/>
+          <el-input v-model="currentTime" readonly class="readonly-input"/>
+          <el-input v-model="timeDifference" readonly class="readonly-input"/>
         </el-form-item>
         <el-form-item label="IV: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.iv" placeholder="IV" clearable/>
@@ -521,6 +523,12 @@ const goBack = () => {
 
     .el-form-item {
       width: 100%;
+
+      .readonly-input ::v-deep .el-input__wrapper {
+        background-color: #f5f5f5 !important; /* 灰色背景 */
+        border-color: #dcdcdc !important; /* 灰色边框，可选 */
+        color: #888 !important; /* 字体颜色，可选 */
+      }
     }
 
     .button-container {

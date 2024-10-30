@@ -24,6 +24,9 @@
         <el-form-item label="用户id: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.userId" placeholder="用户id" clearable/>
         </el-form-item>
+        <el-form-item label="成员列表: " label-width="100px">
+          <el-input v-model="currentBindUserInfoView.memberIdNames" placeholder="成员列表" readonly/>
+        </el-form-item>
         <el-form-item label="抢票球迷id: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.users" placeholder="抢票人员" clearable/>
         </el-form-item>
@@ -35,7 +38,8 @@
         </el-form-item>
         <el-form-item label="过期时间: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.expireTime" placeholder="过期时间" clearable/>
-          <el-input v-model="currentBindUserInfoView.expireTimeStr" placeholder="过期时间" readonly/>
+          <el-input v-model="currentBindUserInfoView.expireTimeStr" placeholder="过期时间" readonly
+          />
           <el-input v-model="currentTime" readonly/>
           <el-input v-model="timeDifference" readonly/>
         </el-form-item>
@@ -47,6 +51,12 @@
         </el-form-item>
         <el-form-item label="座位区域: " label-width="100px">
           <el-input v-model="currentBindUserInfoView.regions" placeholder="地区" clearable/>
+        </el-form-item>
+        <el-form-item label="鉴权token: " label-width="100px">
+          <el-input v-model="currentBindUserInfoView.token" placeholder="鉴权token" clearable/>
+        </el-form-item>
+        <el-form-item label="loginCode: " label-width="100px">
+          <el-input v-model="currentBindUserInfoView.loginCode" placeholder="loginCode" clearable/>
         </el-form-item>
         <div class="button-container">
           <el-button type="primary" @click="bindUserInfo">绑定用户关键信息</el-button>
@@ -171,6 +181,7 @@ interface UserInfoView {
   expireTimeStr: string;
   regions: string;
   expire: boolean;
+  memberIdNames: string
 }
 
 const userInfoViews = ref<UserInfoView[]>([])
@@ -190,7 +201,8 @@ function createEmptyUserInfoView(): UserInfoView {
     expireTime: 0,
     expireTimeStr: "",
     regions: '',
-    expire: false
+    expire: false,
+    memberIdNames: ""
   };
 }
 
@@ -219,25 +231,34 @@ onMounted(() => {
 })
 
 const ALL_REGION = "全部区域"
+
+function buildCurrentBindUserInfoView(selectedUser: UserInfoView) {
+  currentBindUserInfoView.value = createEmptyUserInfoView()
+  currentBindUserInfoView.value = selectedUser;
+  if (selectedUser.regions == "") {
+    currentBindUserInfoView.value.regions = ALL_REGION
+  }
+  currentBindUserInfoView.value.memberIdNames = selectedUser.members.map(user => `${user.id} ${user.realname}`).join(",")
+
+
+  if (selectedUser.users != "") {
+    const idsArray = selectedUser.users.split(',').map(id => id.trim());
+    const namesArray = idsArray.map(id => {
+      const user = findUserById(id, selectedUser.members);
+      return user ? user.realname : id;
+    });
+    currentBindUserInfoView.value.userNames = namesArray.join(', ');
+    currentBindUserInfoView.value.expireTimeStr = formatTimestamp(currentBindUserInfoView.value.expireTime)
+    timeDifference.value = calculateTimeDifference(new Date(currentBindUserInfoView.value.expireTime), new Date())
+  }
+}
+
 // 处理用户选择的方法
 const onUserChange = (userId: string) => {
 
   const selectedUser = userInfoViews.value.find(user => user.userId === userId);
   if (selectedUser) {
-    currentBindUserInfoView.value = selectedUser;
-    if (selectedUser.regions == "") {
-      currentBindUserInfoView.value.regions = ALL_REGION
-    }
-    if (selectedUser.users != "") {
-      const idsArray = selectedUser.users.split(',').map(id => id.trim());
-      const namesArray = idsArray.map(id => {
-        const user = findUserById(id, selectedUser.members);
-        return user ? user.realname : id;
-      });
-      currentBindUserInfoView.value.userNames = namesArray.join(', ');
-      currentBindUserInfoView.value.expireTimeStr = formatTimestamp(currentBindUserInfoView.value.expireTime)
-      timeDifference.value = calculateTimeDifference(new Date(currentBindUserInfoView.value.expireTime), new Date())
-    }
+    buildCurrentBindUserInfoView(selectedUser);
   } else {
     currentBindUserInfoView.value = createEmptyUserInfoView();
   }
@@ -393,7 +414,9 @@ function bindUserInfo() {
   if (bindUserInfoReq.regions == ALL_REGION) {
     bindUserInfoReq.regions = ""
   }
-  axios.post(`${hostName}${path}/order/bindUserInfo`, bindUserInfoReq)
+  axios.post(`${hostName}${path}/order/bindUserInfo`, bindUserInfoReq).then(resp => {
+    buildCurrentBindUserInfoView(resp.data)
+  })
 }
 
 function deleteOrders() {
@@ -497,7 +520,6 @@ const goBack = () => {
     width: 750px;
 
     .el-form-item {
-
       width: 100%;
     }
 

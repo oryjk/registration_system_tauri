@@ -2,8 +2,11 @@
   <div class="container">
     <div class="content">
       <div class="formContainer">
+        <el-form-item label="服务基本信息: ">
+          <el-input v-model="defaultPathPrefix" :placeholder="defaultPathPrefix" readonly class="readonly-input"/>
+        </el-form-item>
         <el-form-item label="文件夹路径: ">
-          <el-input v-model="filePath" placeholder="F:\抢票\spider_img" clearable/>
+          <el-input v-model="filePath" placeholder="D:\抢票\spider_img" clearable/>
         </el-form-item>
         <div class="button-container">
           <el-button type="primary" @click="checkUserInfo">开始监听新用户</el-button>
@@ -132,7 +135,7 @@
 
 <script setup lang="ts">
 import {createDir, exists, readTextFile, renameFile} from '@tauri-apps/api/fs'
-import {inject, onMounted, ref} from 'vue'
+import {inject, onMounted, Ref, ref} from 'vue'
 import axios from 'axios'
 import {ElNotification} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router';
@@ -141,13 +144,15 @@ import {dirname, join} from '@tauri-apps/api/path'
 const route = useRoute()
 const router = useRouter()
 const clientToken = route.query.inviteCode
-const hostName = inject<string>('hostName', '')
-const path = inject<string>('path', '')
+const hostName = inject<Ref<string>>('hostName', '')
+const path = inject<Ref<string>>('path', '')
+
+const defaultPathPrefix=hostName.value+path.value
 const clientTokenId = ref<string>('')
 clientTokenId.value = (Array.isArray(clientToken) ? clientToken[0] : clientToken) as string || '';
 const intervalId = ref(0)
 const jobIntervalId = ref(0)
-const filePath = ref("F:\\抢票\\spider_img")
+const filePath = ref("D:\\抢票\\spider_img")
 const authFile = "auth.json"
 const indexFile = "index.json"
 const memberFile = "member.json"
@@ -217,7 +222,7 @@ const findUserById = (userId: string, members: UserInfo[]): UserInfo | null => {
 const currentBindUserInfoView = ref<UserInfoView>(createEmptyUserInfoView())
 const getUserInfos = async () => {
   try {
-    const response = await axios.get(`${hostName}${path}/order/getUserInfos`);
+    const response = await axios.get(`${defaultPathPrefix}/order/getUserInfos`);
     return response.data;
   } catch (error) {
     console.error('Error fetching user infos:', error);
@@ -349,6 +354,10 @@ async function checkUserInfo() {
   intervalId.value = setInterval(sendUseInfo, 1000);
   jobIntervalId.value = setInterval(getJobs, 5000);
   getUserCandidateOrders()
+  getUserInfos().then(userInfos => {
+    console.log('Fetched user infos:', userInfos);
+    userInfoViews.value = userInfos;
+  })
 
 }
 
@@ -383,7 +392,7 @@ async function sendUseInfo() {
       loginCode: indexContent.code,
       token: authContent
     }
-    axios.post(`${hostName}${path}/order/createUserInfo`, userInfoRequest)
+    axios.post(`${defaultPathPrefix}/order/createUserInfo`, userInfoRequest)
     for (const file of userInfoFiles) {
       const newFilePath = await join(folderPath + userId + '\\', file);
       const targetDir = await dirname(newFilePath);
@@ -404,7 +413,7 @@ function createOrders() {
     console.log("没有选中任何候选订单，跳过")
     return;
   }
-  axios.post(`${hostName}${path}/order/createOrders`, orderIds)
+  axios.post(`${defaultPathPrefix}/order/createOrders`, orderIds)
       .then(() => {
         getJobs()
       })
@@ -416,28 +425,28 @@ function bindUserInfo() {
   if (bindUserInfoReq.regions == ALL_REGION) {
     bindUserInfoReq.regions = ""
   }
-  axios.post(`${hostName}${path}/order/bindUserInfo`, bindUserInfoReq).then(resp => {
+  axios.post(`${defaultPathPrefix}/order/bindUserInfo`, bindUserInfoReq).then(resp => {
     buildCurrentBindUserInfoView(resp.data)
   })
 }
 
 function deleteOrders() {
   const orderIds = prepareDeleteOrderIds.value
-  axios.post(`${hostName}${path}/order/deleteOrders`, orderIds).then(() => {
+  axios.post(`${defaultPathPrefix}/order/deleteOrders`, orderIds).then(() => {
     getJobs()
   })
 
 }
 
 function getJobs() {
-  const runningJobs = axios.get(`${hostName}${path}/order/getJobs`)
+  const runningJobs = axios.get(`${defaultPathPrefix}/order/getJobs`)
   runningJobs.then(response => {
     jobs.value = response.data
   })
 }
 
 function getUserCandidateOrders() {
-  axios.get(`${hostName}${path}/order/getUserCandidateOrders`).then(response => {
+  axios.get(`${defaultPathPrefix}/order/getUserCandidateOrders`).then(response => {
     console.log(response.data)
     candidateOrderInfos.value.clear()
     Object.entries(response.data).forEach(userOrderEntry => {
@@ -453,7 +462,7 @@ function getUserCandidateOrders() {
 }
 
 function getUserOrders() {
-  axios.get(`${hostName}${path}/order/getUserOrders`).then(response => {
+  axios.get(`${defaultPathPrefix}/order/getUserOrders`).then(response => {
     console.log(response.data)
     orderInfos.value.clear()
     Object.entries(response.data).forEach(userOrderEntry => {

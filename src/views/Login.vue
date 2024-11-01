@@ -1,17 +1,28 @@
 <script setup lang="ts">
-import {inject, ref} from "vue";
+import {inject, Ref, ref} from "vue";
 import axios from 'axios'
 
 import {ElNotification} from 'element-plus'
 import {useRouter} from 'vue-router';
 
 
-const hostName = inject<string>('hostName');
-const path = inject<string>('path');
+const default_home_name = inject<Ref<string>>('hostName') || "";
+const default_api_path = inject<Ref<string>>('path') || "";
+
+const host_names = ref<string[]>([default_home_name, "http://127.0.0.1:5689","http://172.16.60.237:5689"]);
+const paths = ref<string[]>([default_api_path, "/api"]);
 
 
-const form = ref({
-  token: 'MUX9cBF8'
+interface Config {
+  token: string,
+  hostName: string,
+  apiPath: string
+}
+
+const form = ref<Config>({
+  token: 'MUX9cBF8',
+  hostName: default_home_name.value,
+  apiPath: default_api_path.value,
 })
 
 const isError = ref(true)
@@ -35,9 +46,11 @@ async function login() {
     })
     return
   }
+  default_home_name.value = form.value.hostName
+  default_api_path.value = form.value.apiPath
   let result
   try {
-    result = await getData(hostName + `${path}/token/check/` + form.value.token)
+    result = await getData(form.value.hostName + form.value.apiPath + `/token/check/` + form.value.token)
   } catch (e) {
     if (axios.isAxiosError(e)) {
       ElNotification({
@@ -71,7 +84,30 @@ async function getData(uri: string): Promise<TokenInfo> {
   <div class="container">
     <h1>信息采集</h1>
     <div class="form_container">
-      <el-input :class="{ 'is-error': isError }" v-model="form.token" placeholder="客户端token:"/>
+      <el-form-item label="客户端token: " label-width="100px">
+        <el-input :class="{ 'is-error': isError }" v-model="form.token" placeholder="客户端token:"/>
+      </el-form-item>
+      <el-form-item label="服务器地址: " label-width="100px">
+        <el-select v-model="form.hostName" placeholder="服务器地址">
+          <el-option
+              v-for="host_name in host_names"
+              :key="host_name"
+              :label="host_name"
+              :value="host_name">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="path地址: " label-width="100px">
+        <el-select v-model="form.apiPath" placeholder="服务器地址">
+          <el-option
+              v-for="path in paths"
+              :key="path"
+              :label="path"
+              :value="path">
+          </el-option>
+        </el-select>
+      </el-form-item>
+
       <el-button type="primary" @click="login">登录</el-button>
     </div>
   </div>

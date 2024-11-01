@@ -4,13 +4,13 @@
   </div>
 </template>
 
-<script setup>
-import { provide } from 'vue';
+<script setup lang="ts">
+import {provide, ref} from 'vue';
 
-const hostName = 'https://oryjk.cn:82'; 
+const hostName = ref<string>('https://oryjk.cn:82');
 // const hostName = 'http://127.0.0.1:5689'; 
 // const path = '/api'; 
-const path = '/ticket'; 
+const path = ref<string>('/ticket');
 provide('hostName', hostName);
 provide('path', path);
 
@@ -50,3 +50,4 @@ provide('path', path);
   text-align: center;
 }
 </style>
+ 

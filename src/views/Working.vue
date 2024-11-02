@@ -2,14 +2,23 @@
   <div class="container">
     <div class="content">
       <div class="formContainer">
-        <el-form-item label="服务基本信息: ">
+        <el-form-item label="服务信息: " label-width="100px">
           <el-input v-model="defaultPathPrefix" :placeholder="defaultPathPrefix" readonly class="readonly-input"/>
         </el-form-item>
-        <el-form-item label="文件夹路径: ">
-          <el-input v-model="filePath" placeholder="D:\抢票\spider_img" clearable/>
+        <el-form-item label="文件夹路径: " label-width="100px">
+          <el-select v-model="filePath" placeholder="请选择文件夹路径" @change="onUserChange">
+            <el-option
+                v-for="filePath in filePaths"
+                :key="filePath"
+                :label="filePath"
+                :value="filePath">
+            </el-option>
+          </el-select>
         </el-form-item>
+
         <div class="button-container">
-          <el-button type="primary" @click="checkUserInfo">开始监听新用户</el-button>
+          <el-button v-show="sendOrderStatus" type="danger" @click="stopRead">停止监测</el-button>
+          <el-button type="primary" :disabled="checkUserBtn.btnStatus" @click="checkUserInfo">开始监听新用户</el-button>
         </div>
       </div>
       <hr/>
@@ -124,8 +133,6 @@
       </div>
       <hr/>
       <div class="btn">
-
-        <el-button v-show="sendOrderStatus" type="danger" @click="stopRead">停止监测</el-button>
         <el-button @click="goBack">返回</el-button>
       </div>
     </div>
@@ -147,18 +154,21 @@ const clientToken = route.query.inviteCode
 const hostName = inject<Ref<string>>('hostName', '')
 const path = inject<Ref<string>>('path', '')
 
-const defaultPathPrefix=hostName.value+path.value
+const defaultPathPrefix = hostName.value + path.value
 const clientTokenId = ref<string>('')
 clientTokenId.value = (Array.isArray(clientToken) ? clientToken[0] : clientToken) as string || '';
 const intervalId = ref(0)
 const jobIntervalId = ref(0)
-const filePath = ref("D:\\抢票\\spider_img")
+const filePaths = ref<string[]>(["F:\\抢票\\spider_img", "D:\\抢票\\spider_img",])
+const filePath = ref(filePaths.value[0])
 const authFile = "auth.json"
 const indexFile = "index.json"
 const memberFile = "member.json"
 const userInfoFiles = [authFile, indexFile, memberFile]
 const sendOrderStatus = ref(false)
 const jobs = ref([])
+
+
 
 
 interface UserInfo {
@@ -341,6 +351,12 @@ const checkedOrderIds = ref<string[]>([]);
 const prepareDeleteOrderIds = ref<string[]>([]);
 const savedOrderIds = ref<string[]>([]);
 
+interface CheckUserBtn {
+  btnStatus: boolean
+}
+
+const checkUserBtn = ref<CheckUserBtn>({btnStatus: false});
+
 async function checkUserInfo() {
 
   let folderPath = filePath.value
@@ -348,12 +364,12 @@ async function checkUserInfo() {
     open4()
     return
   }
+  checkUserBtn.value.btnStatus = true
 
   sendOrderStatus.value = true
 
   intervalId.value = setInterval(sendUseInfo, 1000);
   jobIntervalId.value = setInterval(getJobs, 5000);
-  getUserCandidateOrders()
   getUserInfos().then(userInfos => {
     console.log('Fetched user infos:', userInfos);
     userInfoViews.value = userInfos;
@@ -481,6 +497,7 @@ const stopRead = () => {
   clearInterval(intervalId.value)
   clearInterval(jobIntervalId.value)
   sendOrderStatus.value = false
+  checkUserBtn.value.btnStatus = false
 }
 
 

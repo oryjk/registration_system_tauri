@@ -1,21 +1,38 @@
 <template>
   <div class="container">
+    <div class="btn">
+      <el-button @click="goBack">返回</el-button>
+    </div>
     <el-tabs type="border-card" class="fixed-tabs" v-model="activeName">
-      <el-tab-pane label="用户信息录入" name="first">
-        <UserInfoForm/>
+      <el-tab-pane label="订单情况" name="first">
+        <OrderLists/>
       </el-tab-pane>
+
       <el-tab-pane label="订单直接录入" name="second">
         <OrderForm/>
       </el-tab-pane>
+
+      <el-tab-pane label="用户信息录入" name="third">
+        <UserInfoForm/>
+      </el-tab-pane>
+
     </el-tabs>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import {ref} from 'vue';
 import UserInfoForm from '../components/UserInfoForm.vue';
 import OrderForm from '../components/OrderForm.vue';
+import OrderLists from "../components/OrderLists.vue";
+import {useRoute, useRouter} from "vue-router";
+
+useRoute();
+const router = useRouter()
 const activeName = ref('first'); // 将 activeName 的初始值设置为 "first"
+const goBack = () => {
+  router.push({name: 'Login'});
+};
 </script>
 
 <style scoped lang="scss">

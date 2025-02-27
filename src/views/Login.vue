@@ -6,11 +6,11 @@ import {ElNotification} from 'element-plus'
 import {useRouter} from 'vue-router';
 
 
-const default_home_name = inject<Ref<string>>('hostName') || "";
-const default_api_path = inject<Ref<string>>('path') || "";
+const default_home_name = inject<Ref<string>>('hostName') || ref("https://oryjk.cn:82");
+const default_api_path = inject<Ref<string>>('path') || ref("/ticket");
 
-const host_names = ref<string[]>([default_home_name, "http://127.0.0.1:5689","http://172.16.60.237:5689"]);
-const paths = ref<string[]>([default_api_path, "/api"]);
+const host_names = ref<string[]>([default_home_name.value, "http://127.0.0.1:5689","http://172.16.60.237:5689"]);
+const paths = ref<string[]>([default_api_path.value, "/api"]);
 
 
 interface Config {

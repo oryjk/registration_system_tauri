@@ -3,12 +3,13 @@ import {computed, inject, onMounted, ref, Ref} from 'vue';
 
 import axios from "axios";
 import {ElNotification} from 'element-plus'
+import { ElForm } from 'element-plus'; // 引入 ElForm 类型
 
 const hostName = inject<Ref<string>>('hostName', ref(''))
 const path = inject<Ref<string>>('path', ref(''))
 type RegionMap = Record<string, Region>;
 const regionData = ref<RegionMap>({}); // 存储 Region 数据的响应式对象
-const matchData = ref<Match>({awayName: "", date: undefined, homeName: "", hour: 0, matchId: "", minute: 0, round: 0});
+const matchData = ref<Match>({awayName: "", date: new Date(), homeName: "", hour: 0, matchId: "", minute: 0, round: 0});
 const selectedRegionNames = ref<string>(''); // 存储选中的 Region 的名称
 // 定义表单数据模型
 const form = ref({
@@ -32,6 +33,7 @@ interface Region {
   name: string;
   price: string;
   usable_count: number;
+  key:string
 }
 
 interface Match {
@@ -48,7 +50,7 @@ const regionChange = (value: string) => {
   form.value.region = value
 }
 
-const ruleFormRef = ref(null)
+const ruleFormRef = ref<typeof ElForm | null>(null); // 明确类型
 
 const rules = ref({
   region: [{required: true, message: '请选择区域', trigger: 'change'}],
@@ -60,7 +62,7 @@ const rules = ref({
   token: [
     {required: true, message: '请输入Token', trigger: 'blur'},
     {
-      validator: (rule, value, callback) => {
+      validator: (_:any, value:string, callback: (error?: Error) => void) => {
         if (typeof value === 'string' && !value.startsWith('Bearer ')) {
           callback(new Error('Token 必须以 "Bearer " 开头'));
         } else {
@@ -130,31 +132,34 @@ const open2 = () => {
 }
 
 const onSubmit = () => {
-  ruleFormRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        const currentForm = ref({...form.value, orderId: selectedRegionNames.value});
-        const orderRequest: ClientOrderRequest = {
-          orderId: currentForm.value.id + `|${currentForm.value.matchId}|` + currentForm.value.orderId,
-          matchId: currentForm.value.matchId,
-          orderPayload: currentForm.value.orderPayload,
-          loginCode: currentForm.value.loginCode,
-          token: currentForm.value.token,
-          clientTokenId: currentForm.value.clientTokenId,
-          uid: currentForm.value.uid,
-        };
-        const response = await axios.post(hostName.value + path.value + '/order/createSimpleOrder', orderRequest);
-        console.log('提交成功:', response.data);
-        open1()
-      } catch (error) {
-        console.error('提交失败:', error);
-        open2()
+  if(ruleFormRef.value){
+    ruleFormRef.value.validate(async (valid:any) => {
+      if (valid) {
+        try {
+          const currentForm = ref({...form.value, orderId: selectedRegionNames.value});
+          const orderRequest: ClientOrderRequest = {
+            orderId: currentForm.value.id + `|${currentForm.value.matchId}|` + currentForm.value.orderId,
+            matchId: currentForm.value.matchId,
+            orderPayload: currentForm.value.orderPayload,
+            loginCode: currentForm.value.loginCode,
+            token: currentForm.value.token,
+            clientTokenId: currentForm.value.clientTokenId,
+            uid: currentForm.value.uid,
+          };
+          const response = await axios.post(hostName.value + path.value + '/order/createSimpleOrder', orderRequest);
+          console.log('提交成功:', response.data);
+          open1()
+        } catch (error) {
+          console.error('提交失败:', error);
+          open2()
+        }
+      } else {
+        console.log('error submit!');
+        return false;
       }
-    } else {
-      console.log('error submit!');
-      return false;
-    }
-  });
+    });
+  }
+
 };
 
 // 重置表单
@@ -218,7 +223,7 @@ const sortedRegions = (regions: Region[]) => {
           <el-radio-group v-model="selectedRegionNames" @change="regionChange">
             <el-radio
                 v-for="region in sortedRegions(regions)"
-                :key="region.key"
+                :key="region"
                 :label="region.name"
             >{{ region.name }} (参考余票{{ region.usable_count }})
             </el-radio>

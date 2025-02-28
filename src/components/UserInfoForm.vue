@@ -30,7 +30,7 @@ const jobs = ref([])
 interface UserInfo {
   id: number;
   uid: number;
-  realname: string;
+  realName: string;
   real_card_id: string;
   phone: string;
   is_self: boolean;
@@ -111,14 +111,14 @@ function buildCurrentBindUserInfoView(selectedUser: UserInfoView) {
   if (selectedUser.regions == "") {
     currentBindUserInfoView.value.regions = ALL_REGION
   }
-  currentBindUserInfoView.value.memberIdNames = selectedUser.members.map(user => `${user.id} ${user.realname}`).join(",")
+  currentBindUserInfoView.value.memberIdNames = selectedUser.members.map(user => `${user.id} ${user.realName}`).join(",")
 
 
   if (selectedUser.users != "") {
     const idsArray = selectedUser.users.split(',').map(id => id.trim());
     const namesArray = idsArray.map(id => {
       const user = findUserById(id, selectedUser.members);
-      return user ? user.realname : id;
+      return user ? user.realName : id;
     });
     currentBindUserInfoView.value.userNames = namesArray.join(', ');
     currentBindUserInfoView.value.expireTimeStr = formatTimestamp(currentBindUserInfoView.value.expireTime)
@@ -399,7 +399,7 @@ const goBack = () => {
             <el-option
                 v-for="user in userInfoViews"
                 :key="user.userId"
-                :label="user.members[0].realname"
+                :label="user.members[0].realName"
                 :value="user.userId">
             </el-option>
           </el-select>

@@ -7,6 +7,7 @@ const path = inject<Ref<string>>('path', ref(''))
 
 const defaultPathPrefix = hostName.value + path.value
 const candidateOrderInfos = ref<UserOrderInfoView[]>([])
+const fullscreenLoading = ref(false)
 
 interface UserOrderInfoView {
   userId: string,
@@ -15,10 +16,16 @@ interface UserOrderInfoView {
 }
 
 
-function getUserCandidateOrders() {
-  axios.get(`${defaultPathPrefix}/order/getUserCandidateOrdersByOrderRequest/2`).then(response => {
+function getUserCandidateOrders(number: number) {
+  fullscreenLoading.value = true
+  axios.get(`${defaultPathPrefix}/order/getUserCandidateOrdersByOrderRequest/${number}`).then(response => {
     console.log(response.data)
-    candidateOrderInfos.value = response.data
+    candidateOrderInfos.value=[]
+    candidateOrderInfos.value = response.data.map((user: UserOrderInfoView) => ({
+      ...user,
+      regions: [...user.regions].sort(), // Create a copy to avoid mutating the original data
+    }));
+    fullscreenLoading.value = false
   })
 }
 </script>
@@ -44,7 +51,15 @@ function getUserCandidateOrders() {
 
 
     <div class="button-container">
-      <el-button type="primary" @click="getUserCandidateOrders">刷新候选订单</el-button>
+      <el-button v-loading.fullscreen.lock="fullscreenLoading"
+                 type="primary"
+                 @click="getUserCandidateOrders(0)">刷新进行的订单</el-button>
+      <el-button v-loading.fullscreen.lock="fullscreenLoading"
+                 type="primary"
+                 @click="getUserCandidateOrders(1)">刷新已经抢到的订单</el-button>
+      <el-button v-loading.fullscreen.lock="fullscreenLoading"
+                 type="primary"
+                 @click="getUserCandidateOrders(2)">刷新已经过期的订单</el-button>
 
     </div>
   </div>

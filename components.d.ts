@@ -11,7 +11,6 @@ declare module 'vue' {
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
-    ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElInput: typeof import('element-plus/es')['ElInput']
@@ -26,5 +25,8 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     UserInfoForm: typeof import('./src/components/UserInfoForm.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }
